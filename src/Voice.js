@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Speech from "speak-tts";
+import Pitch from "./Pitch.js";
 
 const speech = new Speech();
 // create a global array variable and each index is new speech.init for each input/voice (init speech will have a forloop )
@@ -8,21 +9,9 @@ const speech = new Speech();
 
 class Voice extends Component {
   constructor(props) {
-    const options = {
-      volume: 1,
-      lang: "en-GB",
-      rate: 2,
-      pitch: 1,
-      voice: "Alex",
-      splitSentences: true,
-      listeners: {
-        onvoiceschanged: voices => {
-          console.log("Event voiceschanged", voices);
-        }
-      }
-    };
     super(props);
     this.state = {
+      speechText: "",
       volume: 1,
       lang: "en-GB",
       rate: 2,
@@ -38,6 +27,22 @@ class Voice extends Component {
     };
 
     this.speech = new Speech();
+  }
+
+  componentDidMount() {
+    const options = {
+      volume: 1,
+      lang: "en-GB",
+      rate: 2,
+      pitch: 2,
+      voice: "Alex",
+      splitSentences: true,
+      listeners: {
+        onvoiceschanged: voices => {
+          console.log("Event voiceschanged", voices);
+        }
+      }
+    };
     this.speech
       .init(options)
       .then(data => {
@@ -47,19 +52,21 @@ class Voice extends Component {
       .catch(e => {
         console.error("An error occured while initializing : ", e);
       });
-    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  handleInputChange(event) {
-    const target = event.target;
-    const name = target.name;
-    this.setState({
-      [name]: target
-    });
-  }
-  // handleChange = e => {
-  //   this.setState({ [e.target.name]: e.target.value });
-  // };
+  handleChange = e => {
+    console.log("UPDATING speechText", e.target.value);
+
+    this.setState({ speechText: e.target.value });
+  };
+
+  // handleInputChange(event) {
+  //   const target = event.target;
+  //   const name = target.name;
+  //   this.setState({
+  //     [name]: target
+  //   });
+  // }
 
   handleSubmit = e => {
     e.preventDefault();
@@ -67,10 +74,10 @@ class Voice extends Component {
     // this.setState({ textInput: "" });
   };
 
-  speak = () => {
+  speak = phrase => {
     speech
       .speak({
-        text: this.state,
+        text: phrase,
         queue: false, // current speech will be interrupted
         listeners: {
           onstart: () => {
@@ -100,9 +107,11 @@ class Voice extends Component {
       });
   };
 
-  componentDidMount() {
-    this.speak();
-  }
+  // pitchValue = (1) => {
+  //   speech.setPitch(1) = () => {
+  //     console.log("pitch set");
+  //   };
+  // };
 
   render() {
     return (
@@ -111,19 +120,23 @@ class Voice extends Component {
           <div id="step1" className="inputButtonContainer">
             <p>text</p>
             <input
-              name="text"
+              value={this.state.speechText}
+              type="text"
+              name="textBox"
               className="inputArea"
-              value={this.state[1]}
-              onChange={this.handleInputChange}
+              onChange={this.handleChange}
             />
-            <p>pitch</p>
+
+            {/* <Pitch setPitch={this.speech.setPitch} /> */}
             <input
               name={this.pitch}
               className="inputArea"
-              value={this.pitch}
-              onChange={this.handleInputChange}
+              onChange={this.speech.setPitch(1)}
             />
-            <button className="playButton" onClick={() => this.speak()}>
+            <button
+              className="playButton"
+              onClick={() => this.speak(this.state.speechText)}
+            >
               Button 1
             </button>
           </div>
